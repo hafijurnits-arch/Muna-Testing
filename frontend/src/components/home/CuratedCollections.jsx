@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../ProductCard';
 import { useCart } from '../../context/CartContext';
@@ -38,55 +38,69 @@ const CuratedCollections = ({ featuredProducts }) => {
         if (navigator.vibrate) navigator.vibrate(50);
     };
 
+    const [activeCollection, setActiveCollection] = useState(null);
+
+    useEffect(() => {
+        if (!featuredProducts || featuredProducts.length === 0) {
+            setActiveCollection(null);
+            return;
+        }
+        
+        const validCollections = collections.map(collection => {
+            const matchedProducts = featuredProducts
+                .filter(prod => {
+                    const name = prod.name?.toLowerCase() || '';
+                    const cat = prod.category?.name?.toLowerCase() || (typeof prod.category === 'string' ? prod.category.toLowerCase() : '');
+                    return collection.keywords.some(kw => name.includes(kw) || cat.includes(kw));
+                })
+                .slice(0, 5);
+            return { ...collection, matchedProducts };
+        }).filter(c => c.matchedProducts.length > 0);
+
+        if (validCollections.length > 0) {
+            // Pick a random collection to display
+            const randomIdx = Math.floor(Math.random() * validCollections.length);
+            setActiveCollection(validCollections[randomIdx]);
+        }
+    }, [featuredProducts]);
+
+    if (!activeCollection) return null;
+
     return (
         <div className="mt-2">
-            {collections.map((collection, idx) => {
-                const matchedProducts = (featuredProducts || [])
-                    .filter(prod => {
-                        const name = prod.name?.toLowerCase() || '';
-                        const cat = prod.category?.name?.toLowerCase() || (typeof prod.category === 'string' ? prod.category.toLowerCase() : '');
-                        return collection.keywords.some(kw => name.includes(kw) || cat.includes(kw));
-                    })
-                    .slice(0, 5);
+            <section className={`mb-6 py-5 ${activeCollection.bgColor} border-y border-slate-100/50`}>
+                <div className="px-4 mb-3">
+                    <h3 className="text-[18px] font-black text-slate-900 tracking-tight">{activeCollection.title}</h3>
+                    <p className="text-[12px] font-medium text-slate-600 mt-0.5">{activeCollection.subtitle}</p>
+                </div>
+                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-2">
+                    {activeCollection.matchedProducts.map(prod => {
+                        const cartItem = cartItems.find(item => item.productId === prod._id);
+                        const quantity = cartItem ? cartItem.quantity : 0;
+                        const shopId = prod.shopId?._id || prod.shopId;
 
-                if (matchedProducts.length === 0) return null;
-
-                return (
-                    <section key={idx} className={`mb-6 py-5 ${collection.bgColor} border-y border-slate-100/50`}>
-                        <div className="px-4 mb-3">
-                            <h3 className="text-[18px] font-black text-slate-900 tracking-tight">{collection.title}</h3>
-                            <p className="text-[12px] font-medium text-slate-600 mt-0.5">{collection.subtitle}</p>
-                        </div>
-                        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-2">
-                            {matchedProducts.map(prod => {
-                                const cartItem = cartItems.find(item => item.productId === prod._id);
-                                const quantity = cartItem ? cartItem.quantity : 0;
-                                const shopId = prod.shopId?._id || prod.shopId;
-
-                                return (
-                                    <div key={prod._id} className="snap-start shrink-0 w-[140px]">
-                                        <ProductCard
-                                            product={prod}
-                                            quantity={quantity}
-                                            onIncrement={() => updateQuantity(prod._id, quantity + 1)}
-                                            onDecrement={() => {
-                                                if (quantity === 1) removeFromCart(prod._id);
-                                                else updateQuantity(prod._id, quantity - 1);
-                                            }}
-                                            onClick={() => shopId
-                                                ? navigate(`/shop/${shopId}/product/${prod._id}`)
-                                                : navigate(`/search?q=${encodeURIComponent(prod.name)}`)}
-                                            onAddClick={(e) => { e.stopPropagation(); handleAddToCart(prod, shopId); }}
-                                            discount="15%"
-                                            deliveryTime="10 MINS"
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                );
-            })}
+                        return (
+                            <div key={prod._id} className="snap-start shrink-0 w-[140px]">
+                                <ProductCard
+                                    product={prod}
+                                    quantity={quantity}
+                                    onIncrement={() => updateQuantity(prod._id, quantity + 1)}
+                                    onDecrement={() => {
+                                        if (quantity === 1) removeFromCart(prod._id);
+                                        else updateQuantity(prod._id, quantity - 1);
+                                    }}
+                                    onClick={() => shopId
+                                        ? navigate(`/shop/${shopId}/product/${prod._id}`)
+                                        : navigate(`/search?q=${encodeURIComponent(prod.name)}`)}
+                                    onAddClick={(e) => { e.stopPropagation(); handleAddToCart(prod, shopId); }}
+                                    discount="15%"
+                                    deliveryTime="10 MINS"
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
 
             {/* ── REPLACE CART MODAL ── */}
             {replacePrompt && (

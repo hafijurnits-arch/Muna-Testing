@@ -226,6 +226,7 @@ const getCustomerOrders = async (req, res) => {
         
         const orders = await Order.find(filter)
             .populate('shopId', 'name address image')
+            .populate('items.productId', 'image')
             .sort('-createdAt')
             .skip((page - 1) * limit)
             .limit(limit)
@@ -298,6 +299,7 @@ const getVendorOrders = async (req, res) => {
         let query = Order.find(filter)
             .select('-deliveryOtp') // Security: Don't send OTP to vendor, otherwise they can cheat via DevTools!
             .populate('customerId', 'name email phone')
+            .populate('items.productId', 'image')
             .sort('-createdAt');
 
         const total = await Order.countDocuments(filter);
@@ -430,6 +432,7 @@ const getAllOrdersForAdmin = async (req, res) => {
         
         const orders = await Order.find(filter)
             .populate('shopId', 'name vendorId address isActive')
+            .populate('items.productId', 'image')
             .populate('customerId', 'name phone')
             .sort({ createdAt: -1 })
             .lean();

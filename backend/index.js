@@ -24,6 +24,8 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:4173',
     'http://127.0.0.1:5173',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
     'https://munastore.in',
     'https://www.munastore.in',
     'https://munahut.in',

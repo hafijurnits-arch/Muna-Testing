@@ -33,7 +33,7 @@ const getShopById = async (req, res) => {
         }
         res.status(200).json(shop);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -47,7 +47,7 @@ const getMyShop = async (req, res) => {
         }
         res.status(200).json(shop);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -91,7 +91,7 @@ const createShop = async (req, res) => {
 
         res.status(201).json(shop);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -171,7 +171,7 @@ const updateShop = async (req, res) => {
         const updatedShop = await shop.save();
         res.status(200).json(updatedShop);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -198,7 +198,7 @@ const updateShopImage = async (req, res) => {
         
         res.status(200).json(updatedShop);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -236,7 +236,7 @@ const calculateDelivery = async (req, res) => {
 
         res.status(200).json({ distance: parseFloat(distance.toFixed(2)), deliveryFee: fee });
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 
@@ -272,7 +272,7 @@ const deleteShop = async (req, res) => {
 
         res.status(200).json({ message: "Shop deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        console.error("calculateDelivery error:", error); res.status(500).json({ message: "Server error" });
     }
 };
 

@@ -230,12 +230,23 @@ const CustomerOrders = () => {
                                         <span className="block text-[12px] font-black text-slate-400 mb-3 uppercase tracking-wider">Order Items</span>
                                         <div className="space-y-2.5 mb-4">
                                             {order.items.map((item, idx) => (
-                                                <div key={idx} className="flex items-start justify-between gap-3">
-                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                        <span className="w-5 h-5 bg-slate-100 rounded flex items-center justify-center border border-slate-200 text-[10px] font-black text-slate-600 shrink-0">{item.quantity}x</span>
-                                                        <span className="text-[13px] font-semibold text-slate-700 truncate">{item.name}</span>
+                                                <div key={idx} className="flex items-start justify-between gap-3 pb-2 border-b border-slate-100/50 last:border-0 last:pb-0">
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                        {item.productId?.image ? (
+                                                            <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                                                <img src={item.productId.image} alt={item.name} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-10 h-10 shrink-0 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-[16px]">
+                                                                📦
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            <span className="w-5 h-5 bg-slate-100 rounded flex items-center justify-center border border-slate-200 text-[10px] font-black text-slate-600 shrink-0">{item.quantity}x</span>
+                                                            <span className="text-[13px] font-semibold text-slate-700 truncate">{item.name}</span>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-[13px] font-bold text-slate-900 shrink-0">₹{item.price * item.quantity}</span>
+                                                    <span className="text-[13px] font-bold text-slate-900 shrink-0 self-center">₹{item.price * item.quantity}</span>
                                                 </div>
                                             ))}
                                         </div>

@@ -4,7 +4,7 @@ const MasterProduct = require('../models/MasterProduct');
 
 const getBestsellers = async (req, res) => {
     try {
-        const { lat, lng, radius = 100 } = req.query;
+        const { lat, lng, radius = 25 } = req.query;
 
         if (!lat || !lng) {
             const globalBest = await Product.find({ inStock: true, approvalStatus: 'approved' })

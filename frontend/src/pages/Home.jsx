@@ -119,6 +119,16 @@ const Home = () => {
             return { ...shop, distance };
         });
 
+        // HIDE SHOPS THAT ARE MORE THAN 25 KM AWAY
+        list = list.filter(shop => {
+            if (userLocation) {
+                // If user location is known, only allow shops within 25km.
+                // This correctly hides shops without coordinates (distance = Infinity)
+                return shop.distance <= 25;
+            }
+            return true;
+        });
+
         if (searchQuery) {
             const q = searchQuery.toLowerCase();
             list = list.filter(s =>
@@ -144,35 +154,36 @@ const Home = () => {
         /* PURE WHITE/LIGHT GRAY BACKGROUND (Blinkit Style) */
         <div className="fixed inset-0 z-[100] flex flex-col bg-slate-50/50 overflow-hidden font-sans antialiased">
 
-            {/* ════════ HEADER ════════ */}
-            <HomeHeader userLocation={userLocation} onPressLocation={() => setShowLocationModal(true)} />
-
-            {/* ════════ ACTIVE ORDER TRACKER ════════ */}
-            {activeOrder && (
-                <div className="bg-amber-100/80 px-4 py-2 border-b border-amber-200/50 flex items-center justify-between z-40">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-sm shrink-0">
-                            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 6v12a3 3 0 11-6 0V6a3 3 0 116 0zM6 15a3 3 0 010-6m12 6a3 3 0 000-6" />
-                            </svg>
-                        </div>
-                        <div className="min-w-0">
-                            <span className="block text-[12px] font-black text-amber-950 leading-none">Order is arriving!</span>
-                            <span className="block text-[9px] font-bold text-amber-700/80 uppercase tracking-widest mt-0.5">Track delivery 🛵</span>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => navigate('/profile/orders')}
-                        className="bg-amber-500 px-3 py-1.5 rounded-full text-white text-[10px] font-black tracking-wide shadow-sm active:scale-95 transition-transform shrink-0"
-                    >
-                        VIEW
-                    </button>
-                </div>
-            )}
-
             {/* ════════ SCROLLABLE BODY ════════ */}
-            <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-24">
-                <div className="w-full max-w-7xl mx-auto">
+            <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-24 relative">
+                
+                {/* ════════ HEADER (Scrolls away) ════════ */}
+                <HomeHeader userLocation={userLocation} onPressLocation={() => setShowLocationModal(true)} />
+
+                {/* ════════ ACTIVE ORDER TRACKER ════════ */}
+                {activeOrder && (
+                    <div className="bg-amber-100/80 px-4 py-2 border-b border-amber-200/50 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-sm shrink-0">
+                                <svg fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 6v12a3 3 0 11-6 0V6a3 3 0 116 0zM6 15a3 3 0 010-6m12 6a3 3 0 000-6" />
+                                </svg>
+                            </div>
+                            <div className="min-w-0">
+                                <span className="block text-[12px] font-black text-amber-950 leading-none">Order is arriving!</span>
+                                <span className="block text-[9px] font-bold text-amber-700/80 uppercase tracking-widest mt-0.5">Track delivery</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => navigate('/profile/orders')}
+                            className="bg-amber-500 px-3 py-1.5 rounded-full text-white text-[10px] font-black tracking-wide shadow-sm active:scale-95 transition-transform shrink-0"
+                        >
+                            VIEW
+                        </button>
+                    </div>
+                )}
+
+                <div className="w-full max-w-7xl mx-auto flex flex-col">
                     
                     {/* ═══ SECTION: BANNER CAROUSEL ═══ */}
                     <section className="bg-white pb-4">
@@ -181,7 +192,7 @@ const Home = () => {
                     </section>
 
                     {/* ═══ SECTION: SEARCH ═══ */}
-                    <section className="bg-slate-50/80 py-1">
+                    <section className="bg-white pt-1 pb-2 border-b border-slate-100 shadow-sm sticky top-0 z-50">
                         <GlobalSearchBar navigate={navigate} />
                     </section>
 
@@ -196,7 +207,8 @@ const Home = () => {
                     {/* ═══ SECTION: CURATED COLLECTIONS ═══ */}
                     <CuratedCollections featuredProducts={safeFeaturedProducts} />
                     
-                    {/* ═══ SECTION: SHOP BY CATEGORY ═══ */}
+                    {/* ═══ SECTION: SHOP BY CATEGORY (Temporarily Hidden) ═══ */}
+                    {/* 
                     <section className="mt-2">
                         <ShopByCategory 
                             categoryList={categoryList}
@@ -205,6 +217,7 @@ const Home = () => {
                             setShowAllCategories={setShowAllCategories}
                         />
                     </section>
+                    */}
                     
                     {/* ═══ SECTION: QUICK DELIVERY ═══ */}
                     <section className="mt-2 bg-white border-y border-slate-100/80 shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
