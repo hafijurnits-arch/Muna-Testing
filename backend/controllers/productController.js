@@ -58,7 +58,7 @@ const getProductsByShop = async (req, res) => {
         const products = await Product.find({
             shopId: shopId,
             approvalStatus: 'approved'
-        }).lean();
+        }).limit(500).lean();
         if (!products || products.length === 0) {
             return res.status(404).json({ message: "no products found" })
         }
@@ -158,7 +158,7 @@ const getVendorCatalog = async (req, res) => {
         const shop = await Shop.findOne({ vendorId: req.user._id });
         if (!shop) return res.status(404).json({ message: 'Shop not found' });
         
-        const products = await Product.find({ shopId: shop._id }).lean();
+        const products = await Product.find({ shopId: shop._id }).limit(500).lean();
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: "Server error" });

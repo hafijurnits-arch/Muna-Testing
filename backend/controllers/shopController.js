@@ -5,7 +5,7 @@ const { getDistanceFromLatLonInKm } = require('../utils/geo');
 const getAllShops = async (req, res) => {
     try {
         let filter = { isActive: true }; // Only active shops by default
-        let query = Shop.find(filter).select('name address image category isOpen location rating udyamNumber');
+        let query = Shop.find(filter).select('name address image category isOpen location rating udyamNumber').limit(1000);
         const shops = await query.lean();
         res.status(200).json(shops);
     } catch (error) {
@@ -27,7 +27,8 @@ const getAllShopsForAdmin = async (req, res) => {
 
 const getShopById = async (req, res) => {
     try {
-        const shop = await Shop.findById(req.params.id).populate('vendorId', 'name email phone').lean();
+        // Public endpoint — only expose the vendor's display name, never email/phone
+        const shop = await Shop.findById(req.params.id).populate('vendorId', 'name').lean();
         if (!shop) {
             return res.status(404).json({ message: "Shop not found" });
         }

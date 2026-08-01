@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
         enum: ['customer', 'vendor', 'super_admin'],
         default: "customer"
     },
+    // Incremented on logout / account deletion to revoke all previously issued JWTs
+    tokenVersion: {
+        type: Number,
+        default: 0
+    },
     savedLocations: [{
         name: { type: String, required: true }, // 'Home', 'Office'
         lat: { type: Number, required: true },
