@@ -1,8 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { useUnreadChats } from '../hooks/useUnreadChats';
 
 /* ─── Premium Outlined Icons ─── */
 const IcoHome = ({ active }) => (
@@ -18,16 +16,6 @@ const IcoHome = ({ active }) => (
 const IcoSearch = ({ active }) => (
     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 3 : 2} className="w-[22px] h-[22px]">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-    </svg>
-);
-
-const IcoBell = ({ active }) => (
-    <svg fill={active ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 0 : 2} className="w-[22px] h-[22px]">
-        {active ? (
-            <path fillRule="evenodd" d="M12 2.25A6.75 6.75 0 005.25 9v.756a8.217 8.217 0 01-2.119 5.52.75.75 0 00.298 1.206c1.544.57 3.16.99 4.831 1.243a3.75 3.75 0 107.48 0 24.585 24.585 0 004.831-1.244.75.75 0 00.298-1.205A8.217 8.217 0 0118.75 9.756V9A6.75 6.75 0 0012 2.25z" clipRule="evenodd" />
-        ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-        )}
     </svg>
 );
 
@@ -59,36 +47,23 @@ const BottomNav = () => {
 
     const totalCartItems = cartItems.reduce((s, i) => s + i.quantity, 0);
 
-    const token = localStorage.getItem('token');
-    const { data: unreadData } = useQuery({
-        queryKey: ['unread-count', user?._id],
-        queryFn: () => fetch('/api/notifications/unread-count', { credentials: 'include', 
-            
-        }).then(r => r.json()),
-        enabled: !!user ,
-    });
-    const unreadCount = unreadData?.count || 0;
-    const { data: unreadChatCount = 0 } = useUnreadChats();
-
-    const totalAlerts = unreadCount + unreadChatCount;
-
     /* Profile link target */
     const profileLink = user
         ? (user.role === 'super_admin' ? '/admin-dashboard' : user.role === 'vendor' ? '/vendor-dashboard' : '/profile')
-        : '/login';
+        : '/profile';
 
-    // Hide bottom nav on these pages
-    const hiddenPaths = ['/profile', '/login', '/vendor', '/admin', '/privacy-policy', '/daily-market', '/chat'];
-    const shouldHide = hiddenPaths.some(p => location.pathname.startsWith(p));
+    // Hide bottom nav on these pages (profile sub-pages keep their own header)
+    const hiddenPaths = ['/login', '/vendor', '/admin', '/privacy-policy', '/daily-market', '/chat'];
+    const isProfileSubPage = location.pathname.startsWith('/profile/');
+    const shouldHide = hiddenPaths.some(p => location.pathname.startsWith(p)) || isProfileSubPage;
     if (shouldHide) return null;
 
     // Determine active tab
     const path = location.pathname;
     const isHome = path === '/';
     const isSearch = path === '/search';
-    const isAlerts = path === '/notifications';
     const isCart = path === '/cart';
-    const isProfile = path === profileLink;
+    const isProfile = path === profileLink || path === '/profile';
 
     // Helper for Nav Items
     const NavItem = ({ icon: Icon, label, isActive, onClick, to, badgeCount }) => {
@@ -133,7 +108,6 @@ const BottomNav = () => {
         <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-white border-t border-slate-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.04)] z-[9000] flex items-stretch pb-[env(safe-area-inset-bottom,0px)]">
             <NavItem icon={IcoHome} label="Home" isActive={isHome} onClick={() => navigate('/')} />
             <NavItem icon={IcoSearch} label="Search" isActive={isSearch} onClick={() => navigate('/search')} />
-            <NavItem icon={IcoBell} label="Alerts" isActive={isAlerts} onClick={() => navigate('/notifications')} badgeCount={totalAlerts} />
             <NavItem icon={IcoCart} label="Cart" isActive={isCart} to="/cart" badgeCount={totalCartItems} />
             <NavItem icon={IcoUser} label={user ? 'Profile' : 'Login'} isActive={isProfile} to={profileLink} />
         </nav>
