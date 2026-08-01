@@ -82,8 +82,11 @@ const Home = () => {
         refetchInterval: 30000,
     });
 
-    const topBanners = useMemo(() => banners.filter(b => b.position === 'top'), [banners]);
-    const midBanners = useMemo(() => banners.filter(b => b.position === 'mid'), [banners]);
+    const topBanners = useMemo(() => (Array.isArray(banners) ? banners : []).filter(b => b.position === 'top'), [banners]);
+    const midBanners = useMemo(() => (Array.isArray(banners) ? banners : []).filter(b => b.position === 'mid'), [banners]);
+
+    const safeShops = useMemo(() => (Array.isArray(shops) ? shops : []), [shops]);
+    const safeFeaturedProducts = useMemo(() => (Array.isArray(featuredProducts) ? featuredProducts : []), [featuredProducts]);
 
     /* ── Geolocation ── */
     useEffect(() => {
@@ -99,15 +102,16 @@ const Home = () => {
 
     /* ── Derived Data ── */
     const categoryList = useMemo(() => {
-        if (!dbCategories || dbCategories.length === 0) {
-            const cats = new Set(shops.map(s => s.category || 'Grocery'));
+        const categories = Array.isArray(dbCategories) ? dbCategories : [];
+        if (categories.length === 0) {
+            const cats = new Set(safeShops.map(s => s.category || 'Grocery'));
             return [{ name: 'All' }, ...Array.from(cats).sort().map(c => ({ name: c }))];
         }
-        return [{ name: 'All' }, ...dbCategories.sort((a, b) => a.sortOrder - b.sortOrder)];
-    }, [shops, dbCategories]);
+        return [{ name: 'All' }, ...[...categories].sort((a, b) => a.sortOrder - b.sortOrder)];
+    }, [safeShops, dbCategories]);
 
     const sortedShops = useMemo(() => {
-        let list = shops.map(shop => {
+        let list = safeShops.map(shop => {
             let distance = Infinity;
             if (userLocation && shop.location?.coordinates?.length === 2) {
                 distance = haversine(userLocation.lat, userLocation.lng, shop.location.coordinates[1], shop.location.coordinates[0]);
@@ -132,7 +136,7 @@ const Home = () => {
             if (a.isOpen !== b.isOpen) return a.isOpen ? -1 : 1;
             return a.distance - b.distance;
         });
-    }, [shops, userLocation, activeCategory, searchQuery]);
+    }, [safeShops, userLocation, activeCategory, searchQuery]);
 
     const totalCartItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
@@ -184,13 +188,13 @@ const Home = () => {
                     {/* ═══ SECTION: BESTSELLERS ═══ */}
                     <section className="mt-2">
                         <Bestsellers 
-                            featuredProducts={featuredProducts} 
+                            featuredProducts={safeFeaturedProducts} 
                             navigate={navigate} 
                         />
                     </section>
 
                     {/* ═══ SECTION: CURATED COLLECTIONS ═══ */}
-                    <CuratedCollections featuredProducts={featuredProducts} />
+                    <CuratedCollections featuredProducts={safeFeaturedProducts} />
                     
                     {/* ═══ SECTION: SHOP BY CATEGORY ═══ */}
                     <section className="mt-2">
@@ -271,7 +275,7 @@ const Home = () => {
                     }
                 }}
                 onSelectLocation={(loc) => setUserLocation(loc)}
-                shops={shops}
+                shops={safeShops}
             />
 
         </div>
