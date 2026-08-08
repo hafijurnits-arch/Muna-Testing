@@ -47,7 +47,11 @@ const userSchema = new mongoose.Schema({
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
+    }],
+    tokenVersion: {
+        type: Number,
+        default: 0
+    }
 });
 
 module.exports = mongoose.model("User", userSchema);

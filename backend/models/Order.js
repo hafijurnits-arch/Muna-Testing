@@ -61,7 +61,7 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    //  Delivery Security PIN (OTP)
+    // Delivery Security PIN (OTP)
     deliveryOtp: {
         type: String,
         required: true
